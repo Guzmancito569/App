@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+import React from 'react';
+import { loadStripe } from "@stripe/stripe-js";
+import {
+   Elements,
+   CardElement,
+   useStripe,
+   useElements, 
+} from "@stripe/react-stripe-js";
+import axios from 'axios'
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+import "bootswatch/dist/lux/bootstrap.min.css";
+import './App.css';
 
-## Available Scripts
+const stripePromise = loadStripe("pk_test_51Jirb5JERUQ8HqUEO8TZsDpXGuCcs7rvvF4NMjgERqWWNhl32HTRzUsjiOC3hY3OR0dfEgSUcBpPyZq9Yh8NALDk00Ee9Qb6A1")
 
-In the project directory, you can run:
+const Ckeckoutform = () => {
+  const stripe = useStripe();
+  const elements = useElements();
 
-### `npm start`
+  const handlesubmit = async (e) => {
+    e.preventDefault();
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  const {error, paymentMethod} = await stripe.createPaymentMethod({
+   type: 'card',
+   card: elements.getElement(CardElement)
+  })
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  if (!error) {
+    const { id } = paymentMethod;
 
-### `npm test`
+    const {data} = await axios.post('http://Localhost:3001/api/checkout', {  
+     id,
+     amount: 10000
+    })
+  
+  console.log(data)
+  }
+  };
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+return (
+ <form onSubmit={handlesubmit} className="card card-body">
+  
+  <img src="https://www.corsair.com/corsairmedia/sys_master/productcontent/CH-9102020-NA-K68_01.png" 
+  alt="k68 keywords" 
+  className="img-fluid"
+  />
 
-### `npm run build`
+<h3 className="text-center my-2">Precio: 100$</h3>
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   <div className="form-group">
+      <CardElement className="form-control" />
+   </div>
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   <button className="btn btn-success">Comprar</button>
+ </form>
+  );
+};
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+function App() {
+  return (
+     <Elements stripe={stripePromise}>
+       <div className="container p-4">
+          <div className="center">
+            <div className="coL-md-4 offset-md-4">
+              <Ckeckoutform/>
+            </div>
+          </div>
+       </div>
+     </Elements>
+  );
+}
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default App;
